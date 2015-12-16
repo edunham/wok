@@ -28,7 +28,8 @@ def factory(filename):
 class Renderer(object):
     extensions = []
 
-    def render(self, plain):
+    @classmethod
+    def render(cls, plain):
         return plain
 all.append(Renderer)
 
@@ -36,7 +37,8 @@ class Plain(Renderer):
     """Plain text renderer. Replaces new lines with html </br>s"""
     extensions = ['txt']
 
-    def render(self, plain):
+    @classmethod
+    def render(cls, plain):
         return plain.replace('\n', '<br>')
 all.append(Plain)
 
@@ -52,8 +54,9 @@ try:
         if have_pygments:
             plugins.extend(['codehilite(css_class=codehilite)', 'fenced_code'])
 
-        def render(self, plain):
-            return markdown(plain, Markdown.plugins)
+        @classmethod
+        def render(cls, plain):
+            return markdown(plain, cls.plugins)
 
     all.append(Markdown)
 
@@ -73,8 +76,9 @@ if markdown is None:
             if have_pygments:
                 extras.append('fenced-code-blocks')
 
-            def render(self, plain):
-                return markdown2.markdown(plain, extras=Markdown2.extras)
+            @classmethod
+            def render(cls, plain):
+                return markdown2.markdown(plain, extras=cls.extras)
 
         all.append(Markdown2)
     except ImportError:
@@ -98,9 +102,10 @@ try:
         def __init__(self, source_path=None):
             self.source_path=source_path
 
-        def render(self, plain):
+        @classmethod
+        def render(cls, plain):
             w = rst_html_writer()
-            return docutils.core.publish_parts(plain, source_path=self.source_path, writer=w)['body']
+            return docutils.core.publish_parts(plain, writer=w)['body']
 
     all.append(ReStructuredText)
 except ImportError:
@@ -114,7 +119,8 @@ try:
         """Textile renderer."""
         extensions = ['textile']
 
-        def render(self, plain):
+        @classmethod
+        def render(cls, plain):
             return textile.textile(plain)
 
     all.append(Textile)
